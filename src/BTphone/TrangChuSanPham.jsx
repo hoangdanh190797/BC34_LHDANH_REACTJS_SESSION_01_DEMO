@@ -27,22 +27,63 @@ export default class TrangChuSanPham extends Component {
   };
   thongTingioHang = () => {
     let { gioHang } = this.state;
-    let soLuongsanPham = gioHang.length;
-
+    let soLuongsanPham = 0;
+    for (let index in gioHang) {
+      soLuongsanPham += gioHang[index].soLuong;
+    }
     let tongTien = 0;
     gioHang.map((sanPham) => {
       tongTien += sanPham.soLuong * sanPham.giaBan;
     });
     return `(${soLuongsanPham} sp - ${tongTien} VNĐ)`;
   };
-  themGiohang = (sanPham) => {
+  themGiohang = (phone) => {
     let { gioHang } = this.state;
     let gioHangNew = [...gioHang];
-    let sanPhamGH = gioHangNew.find((item) => item.maSanPham == sanPham.maSP);
-    if (sanPhamGH) {
+    let phoneNew = { ...phone, soLuong: 1 };
+    // let sanPhamGH = gioHangNew.find((item) => item.maSP === sanPham.maSP);
+    let index = gioHangNew.findIndex((item) => item.maSP == phone.maSP);
+    if (index !== -1) {
+      gioHangNew[index].soLuong += 1;
     } else {
-      let sanPhamthem = { ...sanPham, soLuong: 1 };
-      gioHangNew.push(sanPhamthem);
+      // gioHangNew.push({ ...phone, soLuong: 1 });
+      gioHangNew.push(phoneNew);
+    }
+    this.setState({
+      gioHang: gioHangNew,
+    });
+  };
+
+  xoaGiohang = (sanPham) => {
+    let { gioHang } = this.state;
+    let gioHangNew = [...gioHang];
+    let gioHangdaXoa = gioHangNew.filter((item) => item.maSP !== sanPham.maSP);
+    this.setState({
+      gioHang: gioHangdaXoa,
+    });
+  };
+
+  increase = (sanPham) => {
+    let { gioHang } = this.state;
+    let gioHangNew = [...gioHang];
+    let index = gioHangNew.findIndex((item) => item.maSP == sanPham.maSP);
+    if (index !== -1) {
+      gioHangNew[index].soLuong += 1;
+    }
+    this.setState({
+      gioHang: gioHangNew,
+    });
+  };
+  decrease = (sanPham) => {
+    let { gioHang } = this.state;
+    let gioHangNew = [...gioHang];
+    let index = gioHangNew.findIndex((item) => item.maSP == sanPham.maSP);
+    if (index !== -1) {
+      gioHangNew[index].soLuong -= 1;
+      if(gioHangNew[index].soLuong == 0)
+      {
+        gioHangNew = gioHangNew.filter((item) => item.maSP !== sanPham.maSP);
+      }
     }
     this.setState({
       gioHang: gioHangNew,
@@ -99,9 +140,9 @@ export default class TrangChuSanPham extends Component {
                       </tr>
                     </thead>
                     <tbody>
-                      {gioHang.map((sanPham) => {
+                      {gioHang.map((sanPham, index) => {
                         return (
-                          <tr>
+                          <tr key={index}>
                             <td>{sanPham.maSP}</td>
                             <td>
                               <img
@@ -111,7 +152,21 @@ export default class TrangChuSanPham extends Component {
                               />
                             </td>
                             <td>{sanPham.tenSP}</td>
-                            <td>{sanPham.soLuong}</td>
+                            <td>
+                              <button
+                                className="btn btn-primary"
+                                onClick={() => this.increase(sanPham)}
+                              >
+                                +
+                              </button>
+                              {sanPham.soLuong}
+                              <button
+                                className="btn btn-primary"
+                                onClick={() => this.decrease(sanPham)}
+                              >
+                                -
+                              </button>
+                            </td>
                             <td>{sanPham.giaBan.toLocaleString()}</td>
                             <td>
                               {(
@@ -119,7 +174,12 @@ export default class TrangChuSanPham extends Component {
                               ).toLocaleString()}
                             </td>
                             <td>
-                              <button>Xoá</button>
+                              <button
+                                onClick={() => this.xoaGiohang(sanPham)}
+                                className="btn btn-primary"
+                              >
+                                Xoá
+                              </button>
                             </td>
                           </tr>
                         );
